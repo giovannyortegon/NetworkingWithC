@@ -56,9 +56,9 @@ int main()
 	printf("Create socket... \n");
 	SOCKET socket_listen;
 	socket_listen = socket(bind_address->ai_family,
-			bind_address->ai_socketype, bind_address->ai_protocol);
+			bind_address->ai_socktype, bind_address->ai_protocol);
 
-	if (!ISVALIDSOCKET(socket_liten))
+	if (!ISVALIDSOCKET(socket_listen))
 	{
 		fprintf(stderr, "socket() failed. (%d)\n", GETSOCKETERRNO());
 		return (1);
@@ -70,4 +70,26 @@ int main()
 		fprintf(stderr, "listen() faild. (%d)\n", GETSOCKETERRNO());
 		return (1);
 	}
+
+	printf("Waiting for connection...\n");
+	struct sockaddr_storage client_address;
+	socklen_t client_len = sizeof(client_address);
+	SOCKET socket_client = accept(socket_listen,
+			(struct sockaddr*) &client_address, &client_len);
+	if (!ISVALIDSOCKET(socket_client))
+	{
+		fprintf(stderr, "accept() failed. (%d)\n", GETSOCKETERRNO());
+		return 1;
+	}
+	printf("Client is connected...");
+	char address_buffer[100];
+	getnameinfo((struct sockaddr*) &client_address,
+			client_len, address_buffer, sizeof(address_buffer), 0, 0,
+			NI_NUMERICHOST);
+	printf("%s\n", address_buffer);
+
+	printf("Reading request...\n");
+	char request[1024];
+	int byte_received = recv(socket_client, request, 1024, 0);
+	printf("Received %d bytes.\n", byte_received);
 }
