@@ -63,6 +63,14 @@ int main()
 		fprintf(stderr, "socket() failed. (%d)\n", GETSOCKETERRNO());
 		return (1);
 	}
+	
+	printf("Binding socket to local address...\n");
+	if (bind(socket_listen, bind_address->ai_addr, bind_address->ai_addrlen))
+	{
+		fprintf(stderr, "bind() failed. (%d)\n", GETSOCKETERRNO());
+		return (1);
+	}
+	freeaddrinfo(bind_address);
 
 	printf("Listening... \n");
 	if (listen(socket_listen, 10) < 0)
@@ -92,4 +100,32 @@ int main()
 	char request[1024];
 	int byte_received = recv(socket_client, request, 1024, 0);
 	printf("Received %d bytes.\n", byte_received);
+
+	printf("Sending response...\n");
+	const char *response =
+		"HTTP/1.1 200 OK\r\n"
+		"Connection: close\r\n"
+		"Content-Type: text/plain\r\n\r\n"
+		"Local time is: ";
+	
+	int bytes_sent = send(socket_client, response, strlen(response), 0);
+	printf("Sent %d of %d bytes.\n", bytes_sent, (int) strlen(response));
+
+	time_t timer;
+	time(&timer);
+	char *time_msg = ctime(&timer);
+	bytes_sent = send(socket_client, time_msg, strlen(time_msg), 0);
+	printf("Sent %d of %d bytes.\n", bytes_sent, (int)strlen(time_msg));
+
+	printf("Closing connection...\n");
+	CLOSESOCKET(socket_client);
+
+	printf("Closing listening socket...\n");
+	CLOSESOCKET(socket_listen);
+
+#if defined(_WIN32)
+	WSACleanup();
+#endif
+	printf("Finished.\n");
+	return (0);
 }
