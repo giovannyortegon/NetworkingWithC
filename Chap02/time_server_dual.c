@@ -48,6 +48,7 @@ int main()
 		return (1);
 	}
 #endif
+/* Configurin pprotocols */
 	printf("Configuring local address... \n");
 	struct addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
@@ -84,7 +85,7 @@ int main()
 		return (1);
 	}
 	freeaddrinfo(bind_address);
-
+/* Listening Server */
 	printf("Listening... \n");
 	if (listen(socket_listen, 10) < 0)
 	{
@@ -93,6 +94,8 @@ int main()
 	}
 
 	printf("Waiting for connection...\n");
+
+/* Acept connection of client */	
 	struct sockaddr_storage client_address;
 	socklen_t client_len = sizeof(client_address);
 	SOCKET socket_client = accept(socket_listen,
@@ -108,7 +111,7 @@ int main()
 			client_len, address_buffer, sizeof(address_buffer), 0, 0,
 			NI_NUMERICHOST);
 	printf("%s\n", address_buffer);
-
+/* Recive */
 	printf("Reading request...\n");
 	char request[1024];
 	int byte_received = recv(socket_client, request, 1024, 0);
@@ -120,7 +123,8 @@ int main()
 		"Connection: close\r\n"
 		"Content-Type: text/plain\r\n\r\n"
 		"Local time is: ";
-	
+
+/* Send mesage to client */
 	int bytes_sent = send(socket_client, response, strlen(response), 0);
 	printf("Sent %d of %d bytes.\n", bytes_sent, (int) strlen(response));
 
@@ -130,6 +134,8 @@ int main()
 	bytes_sent = send(socket_client, time_msg, strlen(time_msg), 0);
 	printf("Sent %d of %d bytes.\n", bytes_sent, (int)strlen(time_msg));
 
+
+/* close connection and finish listen port */	
 	printf("Closing connection...\n");
 	CLOSESOCKET(socket_client);
 
