@@ -62,3 +62,49 @@ const char *get_content_type(const char * path)
 	}
 	return "application/octet-stream";
 }
+struct client_info *get_client(SOCKET s)
+{
+	struct client_info *ci = clients;
+
+	while(ci)
+	{
+		if (ci->socket == s)
+			break;
+		ci = ci->next;
+	}
+	if (ci)
+		return (ci);
+
+	struct client_info *n = (struct client_info) calloc(1, sizeof(struct
+				client_info));
+
+	if (!n)
+	{
+		fprintf(stderr, "Out of memory.\n");
+		exit(1);
+	}
+
+	n->address_length = sizeof(n->address);
+	n->next = clients;
+	clients = n;
+
+	return (n);
+}
+void drop_client(struct client_info *client)
+{
+	CLOSESOCKET(client->socket);
+	struct client_info **p = &clients;
+
+	while(*p)
+	{
+		if (*p == client)
+		{
+			*p = client->next;
+			free(client);
+			return;
+		}
+		p = &(*p)->next;
+	}
+	fprintf(stderr, "drop_client not found.\n");
+	exit(1);
+}
