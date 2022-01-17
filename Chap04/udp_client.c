@@ -1,4 +1,4 @@
-#include"chap03.h"
+#include"chap04.h"
 
 #if defined (_WIN32)
 #include<conio.h>
@@ -26,7 +26,7 @@ int main(int argc, char * argv[])
 
 	struct addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_socktype = SOCK_DGRAM;
 
 	struct addrinfo * peer_address;
 
